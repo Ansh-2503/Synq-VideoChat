@@ -29,6 +29,7 @@ export const signup = async (req, res) => {
         .json({ message: "Email already exists, please use a diffrent email" });
     }
 
+    // Need to change url for the profiles
     const idx = Math.floor(Math.random() * 100) + 1;
     const randomAvatar = `https://avatar.iran.liara.run/public/${idx}.png`;
 
