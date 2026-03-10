@@ -29,9 +29,7 @@ export const signup = async (req, res) => {
         .json({ message: "Email already exists, please use a diffrent email" });
     }
 
-    // Need to change url for the profiles
-    const idx = Math.floor(Math.random() * 100) + 1;
-    const randomAvatar = `https://avatar.iran.liara.run/public/${idx}.png`;
+    const randomAvatar = `https://png.pngtree.com/png-clipart/20200224/original/pngtree-cartoon-color-simple-male-avatar-png-image_5230557.jpg`;
 
     const newUser = await User.create({
       email,
@@ -109,11 +107,13 @@ export const login = async (req, res) => {
   }
 };
 
+// ------------------ Logout Functionality ------------------ //
 export const logout = (req, res) => {
   res.clearCookie("jwt");
   res.status(200).json({ success: true, message: "Logout successful" });
 };
 
+// ------------------ Onboarding Functionality ------------------ //
 export const onboard = async (req, res) => {
   try {
     const userId = req.user._id;

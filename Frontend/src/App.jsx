@@ -10,6 +10,7 @@ import ChatPage from "./pages/ChatPage";
 import Onboarding from "./pages/OnboardingPage";
 import PageLoader from "./components/PageLoader.jsx";
 import useAuthUser from "./hooks/useAuthUser.js";
+import OnboardingPage from "./pages/OnboardingPage";
 
 const App = () => {
   const { isLoading, authUser } = useAuthUser();
@@ -58,7 +59,17 @@ const App = () => {
         />
         <Route
           path="/onboarding"
-          element={isAuthenticated ? <Onboarding /> : <Navigate to="/login" />}
+          element={
+            isAuthenticated ? (
+              !isOnboarded ? (
+                <OnboardingPage />
+              ) : (
+                <Navigate to="/" />
+              )
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
         />
       </Routes>
       <Toaster />
