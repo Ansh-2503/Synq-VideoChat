@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { ShipWheelIcon } from "lucide-react";
 import { Link } from "react-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { signup } from "../lib/api";
+import useSignup from "../hooks/useSignup";
 
 const SignUpPage = () => {
   const [signupData, setSignupData] = useState({
@@ -11,16 +10,18 @@ const SignUpPage = () => {
     password: "",
   });
 
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
 
-  const {
-    mutate: signupMutation,
-    isPending,
-    error,
-  } = useMutation({
-    mutationFn: signup,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["authUser"] }),
-  });
+  // const {
+  //   mutate: signupMutation,
+  //   isPending,
+  //   error,
+  // } = useMutation({
+  //   mutationFn: signup,
+  //   onSuccess: () => queryClient.invalidateQueries({ queryKey: ["authUser"] }),
+  // });
+
+  const { error, isPending, signupMutation } = useSignup();
 
   const handleSignup = (event) => {
     event.preventDefault();
@@ -143,7 +144,11 @@ const SignUpPage = () => {
                   </div>
                 </div>
 
-                <button className="btn btn-primary w-full" type="submit">
+                <button
+                  className="btn btn-primary w-full"
+                  type="submit"
+                  disabled={isPending}
+                >
                   {isPending ? (
                     <>
                       <span className="loading loading-spinner loading-xs"></span>
@@ -174,7 +179,7 @@ const SignUpPage = () => {
             {/* Illustration ( signup-img ) */}
             <div className="relative aspect-square max-w-sm mx-auto">
               <img
-                src="./Signup-logo.png"
+                src="./signup-banner.png"
                 alt="Signup img"
                 className="w-full h-full"
               />
