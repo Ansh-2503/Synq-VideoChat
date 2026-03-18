@@ -6,7 +6,7 @@ import { BellIcon, HomeIcon, ShipWheelIcon, UserIcon } from "lucide-react";
 const Sidebar = () => {
   const { authUser } = useAuthUser();
   const location = useLocation();
-  const cuurentPath = location.pathname;
+  const currentPath = location.pathname;
 
   return (
     <aside className="w-64 bg-base-200 border-r border-base-300 hidden lg:flex flex-col h-screen sticky top-0">
@@ -23,29 +23,29 @@ const Sidebar = () => {
         <Link
           to="/"
           className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
-            cuurentPath === "/" ? "btn-active" : ""
+            currentPath === "/" ? "btn-active" : ""
           }`}
         >
           <HomeIcon className="size-5 text-base-content opacity-70" />
           <span>Home</span>
         </Link>
         <Link
-          to="/"
+          to="/friends"
           className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
-            cuurentPath === "/friends" ? "btn-active" : ""
+            currentPath === "/friends" ? "btn-active" : ""
           }`}
         >
           <UserIcon className="size-5 text-base-content opacity-70" />
           <span>Friends</span>
         </Link>
         <Link
-          to="/"
+          to="/notifications"
           className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
-            cuurentPath === "/notifications" ? "btn-active" : ""
+            currentPath === "/notifications" ? "btn-active" : ""
           }`}
         >
           <BellIcon className="size-5 text-base-content opacity-70" />
-          <span>Friends</span>
+          <span>Notifications</span>
         </Link>
       </nav>
 

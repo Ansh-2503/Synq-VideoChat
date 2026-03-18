@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import {
   getOutgoingFriendReqs,
-  getRecommendedUser,
+  getRecommendedUsers,
   getUserFriends,
   sendFriendRequest,
 } from "../lib/api";
@@ -15,43 +15,43 @@ import {
   UsersIcon,
 } from "lucide-react";
 import NoFriendFound from "../components/NoFriendFound";
-import { getLanguageFlag } from "../components/FriendCard";
+import FriendCard, { getLanguageFlag } from "../components/FriendCard";
+import { capitialize } from "../lib/utils";
 
 const HomePage = () => {
   const queryClient = useQueryClient();
-  const [outRequestIds, setOutRequestIds] = useState(new Set());
+  const [outgoingRequestsIds, setOutgoingRequestsIds] = useState(new Set());
 
   const { data: friends = [], isLoading: loadingFriends } = useQuery({
     queryKey: ["friends"],
     queryFn: getUserFriends,
   });
 
-  const { data: recommendUser = [], isLoading: loadingUsers } = useQuery({
+  const { data: recommendedUsers = [], isLoading: loadingUsers } = useQuery({
     queryKey: ["users"],
-    queryFn: getRecommendedUser,
+    queryFn: getRecommendedUsers,
   });
 
-  const { data: outgoingFriendReq } = useQuery({
-    queryKey: ["outgoingFriendsReqs"],
+  const { data: outgoingFriendReqs } = useQuery({
+    queryKey: ["outgoingFriendReqs"],
     queryFn: getOutgoingFriendReqs,
   });
 
-  const { mutate: sendReqMutation, isPending } = useMutation({
+  const { mutate: sendRequestMutation, isPending } = useMutation({
     mutationFn: sendFriendRequest,
-    onSuccess: queryClient.invalidateQueries({
-      queryKey: ["outgoingFriendsReqs"],
-    }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["outgoingFriendReqs"] }),
   });
 
   useEffect(() => {
     const outgoingIds = new Set();
-    if (outgoingFriendReq && outgoingFriendReq.length > 0) {
-      outgoingFriendReq.forEach((req) => {
-        outgoingIds.add(req.id);
+    if (outgoingFriendReqs && outgoingFriendReqs.length > 0) {
+      outgoingFriendReqs.forEach((req) => {
+        outgoingIds.add(req.recipient._id);
       });
-      setOutRequestIds(outgoingIds);
+      setOutgoingRequestsIds(outgoingIds);
     }
-  }, [outgoingFriendReq]);
+  }, [outgoingFriendReqs]);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
@@ -65,6 +65,7 @@ const HomePage = () => {
             Friend Requests
           </Link>
         </div>
+
         {loadingFriends ? (
           <div className="flex justify-center py-12">
             <span className="loading loading-spinner loading-lg" />
@@ -87,7 +88,7 @@ const HomePage = () => {
                   Meet New Learners
                 </h2>
                 <p className="opacity-70">
-                  Discover the perfact language exchange partner based on your
+                  Discover perfect language exchange partners based on your
                   profile
                 </p>
               </div>
@@ -98,7 +99,7 @@ const HomePage = () => {
             <div className="flex justify-center py-12">
               <span className="loading loading-spinner loading-lg" />
             </div>
-          ) : recommendUser.length === 0 ? (
+          ) : recommendedUsers.length === 0 ? (
             <div className="card bg-base-200 p-6 text-center">
               <h3 className="font-semibold text-lg mb-2">
                 No recommendations available
@@ -109,8 +110,9 @@ const HomePage = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {recommendUser.map((user) => {
-                const hasRequestBeenSent = outRequestIds.has(user.id);
+              {recommendedUsers.map((user) => {
+                const hasRequestBeenSent = outgoingRequestsIds.has(user._id);
+
                 return (
                   <div
                     key={user._id}
@@ -119,8 +121,13 @@ const HomePage = () => {
                     <div className="card-body p-5 space-y-4">
                       <div className="flex items-center gap-3">
                         <div className="avatar size-16 rounded-full">
-                          <img src={user.profilePic} alt={user.fullName} />
+                          <img
+                            src={user.profilePic}
+                            alt={user.fullName}
+                            className="rounded-full"
+                          />
                         </div>
+
                         <div>
                           <h3 className="font-semibold text-lg">
                             {user.fullName}
@@ -133,13 +140,14 @@ const HomePage = () => {
                           )}
                         </div>
                       </div>
-                      {/* Language with flags */}
-                      <div className="flex flex-wrap fap-1.5">
+
+                      {/* Languages with flags */}
+                      <div className="flex flex-wrap gap-1.5">
                         <span className="badge badge-secondary">
                           {getLanguageFlag(user.nativeLanguage)}
                           Native: {capitialize(user.nativeLanguage)}
                         </span>
-                        <span className="badge badge-secondary">
+                        <span className="badge badge-outline">
                           {getLanguageFlag(user.learningLanguage)}
                           Learning: {capitialize(user.learningLanguage)}
                         </span>
@@ -149,11 +157,12 @@ const HomePage = () => {
                         <p className="text-sm opacity-70">{user.bio}</p>
                       )}
 
+                      {/* Action button */}
                       <button
                         className={`btn w-full mt-2 ${
                           hasRequestBeenSent ? "btn-disabled" : "btn-primary"
-                        }`}
-                        onClick={() => sendReqMutation(user._id)}
+                        } `}
+                        onClick={() => sendRequestMutation(user._id)}
                         disabled={hasRequestBeenSent || isPending}
                       >
                         {hasRequestBeenSent ? (
@@ -181,5 +190,3 @@ const HomePage = () => {
 };
 
 export default HomePage;
-
-export const capitialize = (str) => str.charAt(0).toUpperCase() + str.slice(1);

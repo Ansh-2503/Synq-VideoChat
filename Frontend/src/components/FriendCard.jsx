@@ -2,6 +2,7 @@
 import React from "react";
 import { Link } from "react-router";
 import { LANGUAGE_TO_FLAG } from "../constants/index.js";
+import { MessagesSquare } from "lucide-react";
 
 const FriendCard = ({ friend }) => {
   return (
@@ -10,7 +11,11 @@ const FriendCard = ({ friend }) => {
         {/* User Information */}
         <div className="flex items-center gap-3 mb-3">
           <div className="avatar size-12">
-            <img src={friend.profilePic} alt={friend.fullNamw} />
+            <img
+              src={friend.profilePic}
+              alt={friend.fullName}
+              className="rounded-full"
+            />
           </div>
           <h3>{friend.fullName}</h3>
         </div>
@@ -25,6 +30,7 @@ const FriendCard = ({ friend }) => {
           </span>
         </div>
         <Link to={`/chat/${friend._id}`} className="btn btn-outline w-full">
+          <MessagesSquare className="size-4" />
           Message
         </Link>
       </div>
