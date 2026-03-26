@@ -112,7 +112,7 @@ WebRTC (Video Calling)
 
 ### 1️⃣ Clone Repository
 
-git clone https://github.com/your-username/synq.git
+git clone repo-link(https://github.com/username/repo_name)
 
 ### 2️⃣ Backend Setup
 
