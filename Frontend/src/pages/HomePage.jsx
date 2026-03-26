@@ -1,189 +1,111 @@
-/* eslint-disable react-hooks/set-state-in-effect */
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import React, { useEffect, useState } from "react";
-import {
-  getOutgoingFriendReqs,
-  getRecommendedUsers,
-  getUserFriends,
-  sendFriendRequest,
-} from "../lib/api";
-import { Link } from "react-router";
-import {
-  CheckCircleIcon,
-  MapPinIcon,
-  UserPlusIcon,
-  UsersIcon,
-} from "lucide-react";
-import NoFriendFound from "../components/NoFriendFound";
-import FriendCard, { getLanguageFlag } from "../components/FriendCard";
-import { capitialize } from "../lib/utils";
+import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getUserFriends } from "../lib/api";
+import useAuthUser from "../hooks/useAuthUser";
+import { SearchIcon, MessageSquareIcon } from "lucide-react";
+import ChatContainer from "../components/ChatContainer";
 
 const HomePage = () => {
-  const queryClient = useQueryClient();
-  const [outgoingRequestsIds, setOutgoingRequestsIds] = useState(new Set());
+  const { authUser } = useAuthUser();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedChatUser, setSelectedChatUser] = useState(null);
 
-  const { data: friends = [], isLoading: loadingFriends } = useQuery({
+  const { data: friends = [], isLoading } = useQuery({
     queryKey: ["friends"],
     queryFn: getUserFriends,
   });
 
-  const { data: recommendedUsers = [], isLoading: loadingUsers } = useQuery({
-    queryKey: ["users"],
-    queryFn: getRecommendedUsers,
-  });
-
-  const { data: outgoingFriendReqs } = useQuery({
-    queryKey: ["outgoingFriendReqs"],
-    queryFn: getOutgoingFriendReqs,
-  });
-
-  const { mutate: sendRequestMutation, isPending } = useMutation({
-    mutationFn: sendFriendRequest,
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["outgoingFriendReqs"] }),
-  });
-
-  useEffect(() => {
-    const outgoingIds = new Set();
-    if (outgoingFriendReqs && outgoingFriendReqs.length > 0) {
-      outgoingFriendReqs.forEach((req) => {
-        outgoingIds.add(req.recipient._id);
-      });
-      setOutgoingRequestsIds(outgoingIds);
-    }
-  }, [outgoingFriendReqs]);
+  const filteredFriends =
+    searchTerm.trim() === ""
+      ? friends
+      : friends.filter((friend) =>
+          friend.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+        );
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8">
-      <div className="container mx-auto space-y-10">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-            Your Friends
+    <div className="flex h-full w-full overflow-hidden">
+      {/* Left Sidebar - Friend List */}
+      <div
+        className={`w-full md:w-80 lg:w-96 border-r border-base-300 flex flex-col bg-base-100 shrink-0 transition-none ${
+          selectedChatUser ? "hidden md:flex" : "flex"
+        }`}
+      >
+        <div className="p-4 border-b border-base-300">
+          <h2 className="text-xl font-bold truncate">
+            {authUser?.fullName || "Messages"}
           </h2>
-          <Link to="/notifications" className="btn btn-outline btn-sm">
-            <UsersIcon className="mr-2 size-4" />
-            Friend Requests
-          </Link>
         </div>
 
-        {loadingFriends ? (
-          <div className="flex justify-center py-12">
-            <span className="loading loading-spinner loading-lg" />
+        <div className="p-4 py-3">
+          <div className="relative">
+            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 opacity-50" />
+            <input
+              type="text"
+              placeholder="Search friends..."
+              className="input input-sm input-bordered w-full pl-9 rounded-full bg-base-200"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
-        ) : friends.length === 0 ? (
-          <NoFriendFound />
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {friends.map((friend) => (
-              <FriendCard key={friend._id} friend={friend} />
-            ))}
-          </div>
-        )}
+        </div>
 
-        <section>
-          <div className="mb-6 sm:mb-8">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                  Meet New Learners
-                </h2>
-                <p className="opacity-70">
-                  Discover perfect language exchange partners based on your
-                  profile
-                </p>
-              </div>
+        <div className="flex-1 overflow-y-auto w-full p-2 space-y-1">
+          {isLoading ? (
+            <div className="flex justify-center py-8">
+              <span className="loading loading-spinner loading-md" />
             </div>
-          </div>
-
-          {loadingUsers ? (
-            <div className="flex justify-center py-12">
-              <span className="loading loading-spinner loading-lg" />
-            </div>
-          ) : recommendedUsers.length === 0 ? (
-            <div className="card bg-base-200 p-6 text-center">
-              <h3 className="font-semibold text-lg mb-2">
-                No recommendations available
-              </h3>
-              <p className="text-base-content opacity-70">
-                Check back later for new language partners!
-              </p>
+          ) : filteredFriends.length === 0 ? (
+            <div className="text-center opacity-50 py-8">
+              {searchTerm ? "No user found" : "No friends found"}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {recommendedUsers.map((user) => {
-                const hasRequestBeenSent = outgoingRequestsIds.has(user._id);
-
-                return (
-                  <div
-                    key={user._id}
-                    className="card bg-base-200 hover:shadow-lg transition-all duration-300"
-                  >
-                    <div className="card-body p-5 space-y-4">
-                      <div className="flex items-center gap-3">
-                        <div className="avatar size-16 rounded-full">
-                          <img
-                            src={user.profilePic}
-                            alt={user.fullName}
-                            className="rounded-full"
-                          />
-                        </div>
-
-                        <div>
-                          <h3 className="font-semibold text-lg">
-                            {user.fullName}
-                          </h3>
-                          {user.location && (
-                            <div className="flex items-center text-xs opacity-70 mt-1">
-                              <MapPinIcon className="size-3 mr-1" />
-                              {user.location}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Languages with flags */}
-                      <div className="flex flex-wrap gap-1.5">
-                        <span className="badge badge-secondary">
-                          {getLanguageFlag(user.nativeLanguage)}
-                          Native: {capitialize(user.nativeLanguage)}
-                        </span>
-                        <span className="badge badge-outline">
-                          {getLanguageFlag(user.learningLanguage)}
-                          Learning: {capitialize(user.learningLanguage)}
-                        </span>
-                      </div>
-
-                      {user.bio && (
-                        <p className="text-sm opacity-70">{user.bio}</p>
-                      )}
-
-                      {/* Action button */}
-                      <button
-                        className={`btn w-full mt-2 ${
-                          hasRequestBeenSent ? "btn-disabled" : "btn-primary"
-                        } `}
-                        onClick={() => sendRequestMutation(user._id)}
-                        disabled={hasRequestBeenSent || isPending}
-                      >
-                        {hasRequestBeenSent ? (
-                          <>
-                            <CheckCircleIcon className="size-4 mr-2" />
-                            Request Sent
-                          </>
-                        ) : (
-                          <>
-                            <UserPlusIcon className="size-4 mr-2" />
-                            Send Friend Request
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            filteredFriends.map((friend) => (
+              <button
+                key={friend._id}
+                onClick={() => setSelectedChatUser(friend)}
+                className={`w-full flex items-center gap-3 p-3 rounded-xl hover:bg-base-200 transition-colors ${
+                  selectedChatUser?._id === friend._id ? "bg-base-200" : ""
+                }`}
+              >
+                <div className="avatar size-12 shrink-0">
+                  <img
+                    src={friend.profilePic}
+                    alt={friend.fullName}
+                    className="rounded-full object-cover"
+                  />
+                </div>
+                <div className="flex flex-col text-left overflow-hidden">
+                  <span className="font-semibold truncate">
+                    {friend.fullName}
+                  </span>
+                  <span className="text-xs opacity-70 truncate">
+                    Tap to message
+                  </span>
+                </div>
+              </button>
+            ))
           )}
-        </section>
+        </div>
+      </div>
+
+      {/* Right Main Area - Active Chat */}
+      <div
+        className={`flex-1 bg-base-100 flex flex-col ${
+          selectedChatUser ? "flex" : "hidden md:flex"
+        }`}
+      >
+        {selectedChatUser ? (
+          <ChatContainer
+            targetUserId={selectedChatUser._id}
+            onClose={() => setSelectedChatUser(null)}
+          />
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center opacity-50 h-[calc(100vh-4rem)]">
+            <MessageSquareIcon className="size-16 mb-4" />
+            <p className="text-xl font-medium tracking-tight">Your Messages</p>
+            <p className="text-sm mt-1">Select a friend to start chatting</p>
+          </div>
+        )}
       </div>
     </div>
   );

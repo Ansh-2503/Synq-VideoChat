@@ -17,8 +17,8 @@ const SignUpPage = () => {
     signupMutation(signupData);
   };
   return (
-    <div className="h-screen flex items-center justify-center p-4 sm:p-6 md:p-8">
-      <div className="border border-primary/25 flex flex-col lg:flex-row w-full max-w-5xl mx-auto bg-base-100 rounded-xl shadow-lg overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8 bg-base-100">
+      <div className="border border-base-content/10 flex flex-col lg:flex-row w-full max-w-5xl mx-auto bg-transparent lg:bg-base-100 rounded-[2rem] shadow-none lg:shadow-xl overflow-hidden">
         {/* SignUp Form - Left Side */}
         <div className="w-full lg:w-1/2 p-4 sm:p-8 flex flex-col">
           {/* App Logo */}
@@ -56,7 +56,7 @@ const SignUpPage = () => {
                     <input
                       type="text"
                       placeholder="John doe"
-                      className="input input-bordered w-full"
+                      className="input bg-base-200/50 rounded-2xl w-full border-none focus:bg-base-200 transition-colors"
                       value={signupData.fullName}
                       onChange={(e) =>
                         setSignupData({
@@ -64,7 +64,6 @@ const SignUpPage = () => {
                           fullName: e.target.value,
                         })
                       }
-                      required
                     />
                   </div>
                   {/* Email - Field */}
@@ -75,7 +74,7 @@ const SignUpPage = () => {
                     <input
                       type="email"
                       placeholder="Johndoe12@c.com"
-                      className="input input-bordered w-full"
+                      className="input bg-base-200/50 rounded-2xl w-full border-none focus:bg-base-200 transition-colors"
                       value={signupData.email}
                       onChange={(e) =>
                         setSignupData({
@@ -83,7 +82,6 @@ const SignUpPage = () => {
                           email: e.target.value,
                         })
                       }
-                      required
                     />
                   </div>
                   {/* Password - Field */}
@@ -94,7 +92,7 @@ const SignUpPage = () => {
                     <input
                       type="password"
                       placeholder="*******"
-                      className="input input-bordered w-full"
+                      className="input bg-base-200/50 rounded-2xl w-full border-none focus:bg-base-200 transition-colors"
                       value={signupData.password}
                       onChange={(e) =>
                         setSignupData({
@@ -102,7 +100,6 @@ const SignUpPage = () => {
                           password: e.target.value,
                         })
                       }
-                      required
                     />
                     <p className="text-xs opacity-70 mt-1">
                       Password must be at least 6 characters long
@@ -111,11 +108,7 @@ const SignUpPage = () => {
                   {/* CheckBox - Field */}
                   <div className="form-control">
                     <label className="label cursor-pointer justify-start gap-2">
-                      <input
-                        type="checkbox"
-                        className="checkbox checkbox-sm"
-                        required
-                      />
+                      <input type="checkbox" className="checkbox checkbox-sm" />
                       <span className="text-xs leading-tight">
                         I agree to the{" "}
                         <span className="text-primary hover:underline">
@@ -131,7 +124,7 @@ const SignUpPage = () => {
                 </div>
 
                 <button
-                  className="btn btn-primary w-full"
+                  className="btn btn-primary w-full rounded-2xl mt-4"
                   type="submit"
                   disabled={isPending}
                 >

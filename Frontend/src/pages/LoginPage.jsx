@@ -18,8 +18,8 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="h-screen flex items-center justify-center p-4 sm:p-6 md:p-8">
-      <div className="border border-primary/25 flex flex-col lg:flex-row w-full max-w-5xl mx-auto bg-base-100 rounded-xl shadow-lg overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8 bg-base-100">
+      <div className="border border-base-content/10 flex flex-col lg:flex-row w-full max-w-5xl mx-auto bg-transparent lg:bg-base-100 rounded-[2rem] shadow-none lg:shadow-xl overflow-hidden">
         {/* Login Form Section */}
         <div className="w-full lg:w-1/2 p-4 sm:p-8 flex flex-col">
           {/* logo */}
@@ -54,7 +54,7 @@ const LoginPage = () => {
                     <input
                       type="email"
                       placeholder="user@gmail.com"
-                      className="input input-bordered w-full"
+                      className="input bg-base-200/50 rounded-2xl w-full border-none focus:bg-base-200 transition-colors"
                       value={loginData.email}
                       onChange={(e) =>
                         setLoginData({
@@ -73,7 +73,7 @@ const LoginPage = () => {
                     <input
                       type="password"
                       placeholder="*******"
-                      className="input input-bordered w-full"
+                      className="input bg-base-200/50 rounded-2xl w-full border-none focus:bg-base-200 transition-colors"
                       value={loginData.password}
                       onChange={(e) =>
                         setLoginData({
@@ -86,7 +86,7 @@ const LoginPage = () => {
                   </div>
                   {/* Sign in - button */}
                   <button
-                    className="btn btn-primary w-full"
+                    className="btn btn-primary w-full rounded-2xl mt-4"
                     type="submit"
                     disabled={isPending}
                   >

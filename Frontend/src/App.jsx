@@ -8,6 +8,8 @@ import Notifications from "./pages/NotificationsPage";
 import CallPage from "./pages/CallPage";
 import ChatPage from "./pages/ChatPage";
 import Onboarding from "./pages/OnboardingPage";
+import FriendsPage from "./pages/FriendsPage";
+import SearchPage from "./pages/SearchPage";
 import PageLoader from "./components/PageLoader.jsx";
 import useAuthUser from "./hooks/useAuthUser.js";
 import Layout from "./components/Layout.jsx";
@@ -33,6 +35,30 @@ const App = () => {
             isAuthenticated && isOnboarded ? (
               <Layout showSidebar={true}>
                 <HomePage />
+              </Layout>
+            ) : (
+              <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+            )
+          }
+        />
+        <Route
+          path="/friends"
+          element={
+            isAuthenticated && isOnboarded ? (
+              <Layout showSidebar={true}>
+                <FriendsPage />
+              </Layout>
+            ) : (
+              <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+            )
+          }
+        />
+        <Route
+          path="/search"
+          element={
+            isAuthenticated && isOnboarded ? (
+              <Layout showSidebar={true}>
+                <SearchPage />
               </Layout>
             ) : (
               <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
@@ -72,8 +98,14 @@ const App = () => {
           }
         />
         <Route
-          path="/call"
-          element={isAuthenticated ? <CallPage /> : <Navigate to="/login" />}
+          path="/call/:id"
+          element={
+            isAuthenticated && isOnboarded ? (
+              <CallPage />
+            ) : (
+              <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+            )
+          }
         />
         <Route
           path="/chat/:id"
@@ -91,11 +123,7 @@ const App = () => {
           path="/onboarding"
           element={
             isAuthenticated ? (
-              !isOnboarded ? (
-                <Onboarding />
-              ) : (
-                <Navigate to="/" />
-              )
+              <Onboarding />
             ) : (
               <Navigate to="/login" />
             )

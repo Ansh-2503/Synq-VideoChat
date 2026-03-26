@@ -1,6 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React from "react";
-import { acceptFriendRequest, getFriendRequests } from "../lib/api";
+import { acceptFriendRequest, rejectFriendRequest } from "../lib/api";
+import useFriendRequests from "../hooks/useFriendRequests";
 import {
   BellIcon,
   ClockIcon,
@@ -11,10 +12,7 @@ import NoNotifications from "../components/NoNotifications";
 
 const NotificationsPage = () => {
   const queryClient = useQueryClient();
-  const { data: friendRequests, isLoading } = useQuery({
-    queryKey: ["friendRequests"],
-    queryFn: getFriendRequests,
-  });
+  const { incomingRequests, acceptedRequests, isLoading } = useFriendRequests();
 
   const { mutate: acceptRequestMutation, isPending } = useMutation({
     mutationFn: acceptFriendRequest,
@@ -24,10 +22,13 @@ const NotificationsPage = () => {
     },
   });
 
-  const incomingRequests = friendRequests?.incomingReqs || [];
-  const acceptedRequests = friendRequests?.acceptedReqs || [];
-
-  return (
+  const { mutate: rejectRequestMutation, isPending: isRejectPending } = useMutation({
+    mutationFn: rejectFriendRequest,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["friendRequests"] });
+      queryClient.invalidateQueries({ queryKey: ["recommendedUsers"] });
+    },
+  });  return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="container mx-auto max-w-4xl space-y-8">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-6">
@@ -81,13 +82,22 @@ const NotificationsPage = () => {
                             </div>
                           </div>
 
-                          <button
-                            className="btn btn-primary btn-sm"
-                            onClick={() => acceptRequestMutation(request._id)}
-                            disabled={isPending}
-                          >
-                            Accept
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              className="btn btn-primary btn-sm"
+                              onClick={() => acceptRequestMutation(request._id)}
+                              disabled={isPending || isRejectPending}
+                            >
+                              Accept
+                            </button>
+                            <button
+                              className="btn btn-ghost btn-sm text-error"
+                              onClick={() => rejectRequestMutation(request._id)}
+                              disabled={isPending || isRejectPending}
+                            >
+                              Reject
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>

@@ -1,4 +1,4 @@
-import { axiosInstance } from "./axio";
+import { axiosInstance } from "./axio.js";
 
 export const signup = async (signupData) => {
   const response = await axiosInstance.post("/auth/signup", signupData);
@@ -62,7 +62,14 @@ export const acceptFriendRequest = async (requestId) => {
   return response.data;
 };
 
-export const getStreamToken = async () => {
-  const response = await axiosInstance.get("/chat/token");
+export const rejectFriendRequest = async (requestId) => {
+  const response = await axiosInstance.delete(
+    `/users/friend-request/${requestId}/reject`
+  );
   return response.data;
 };
+
+export async function getStreamToken() {
+  const response = await axiosInstance.get("/chat/token");
+  return response.data;
+}

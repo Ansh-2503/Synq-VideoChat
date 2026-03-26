@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { useNavigate } from "react-router";
 import useAuthUser from "../hooks/useAuthUser";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast, { LoaderIcon } from "react-hot-toast";
@@ -8,6 +9,7 @@ import {
   MapPinIcon,
   ShipWheelIcon,
   UploadIcon,
+  TrashIcon,
 } from "lucide-react";
 import { LANGUAGES } from "../constants";
 
@@ -24,11 +26,16 @@ const OnboardingPage = () => {
     profilePic: authUser?.profilePic || "",
   });
 
+  const fileInputRef = useRef(null);
+  const navigate = useNavigate();
+
   const { mutate: onboardMutation, isPending } = useMutation({
     mutationFn: completeOnboarding,
     onSuccess: () => {
-      toast.success("Profile onboarded successfully");
+      toast.success(authUser?.isOnboarded ? "Profile updated successfully" : "Profile onboarded successfully");
       queryClient.invalidateQueries({ queryKey: ["authUser"] });
+      // Redirect to home page
+      navigate("/");
     },
 
     onError: (error) => {
@@ -41,18 +48,33 @@ const OnboardingPage = () => {
     onboardMutation(formState);
   };
 
-  // Manage this in some times
   const handleProfilePic = (e) => {
     e.preventDefault();
-    console.log("Updated");
+    fileInputRef.current?.click();
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setFormState({ ...formState, profilePic: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = (e) => {
+    e.preventDefault();
+    setFormState({ ...formState, profilePic: "https://png.pngtree.com/png-clipart/20200224/original/pngtree-cartoon-color-simple-male-avatar-png-image_5230557.jpg" });
   };
 
   return (
     <div className="min-h-screen bg-base-100 flex items-center justify-center p-4">
-      <div className="card bg-base-200 w-full max-w-3xl shadow-xl">
+      <div className="card border border-base-content/10 bg-transparent lg:bg-base-100 w-full max-w-3xl shadow-none lg:shadow-xl rounded-[2rem]">
         <div className="card-body p-6 sm:p-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-center mb-6">
-            Complete Your Profile
+            {authUser?.isOnboarded ? "Update Profile" : "Complete Your Profile"}
           </h1>
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Profile Pic Container */}
@@ -71,16 +93,32 @@ const OnboardingPage = () => {
                   </div>
                 )}
               </div>
-              {/* Uplaod Image handling */}
               <div className="flex items-center gap-2">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  ref={fileInputRef}
+                  onChange={handleImageChange}
+                />
                 <button
                   type="button"
                   onClick={handleProfilePic}
-                  className="btn btn-accent"
+                  className="btn btn-accent rounded-full"
                 >
                   <UploadIcon className="size-4 mr-2" />
                   Upload Image
                 </button>
+                {formState.profilePic !== "https://png.pngtree.com/png-clipart/20200224/original/pngtree-cartoon-color-simple-male-avatar-png-image_5230557.jpg" && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    className="btn btn-error rounded-full"
+                  >
+                    <TrashIcon className="size-4 mr-2" />
+                    Delete Image
+                  </button>
+                )}
               </div>
             </div>
             {/* Full Name - field */}
@@ -95,7 +133,7 @@ const OnboardingPage = () => {
                 onChange={(e) => {
                   setFormState({ ...formState, fullName: e.target.value });
                 }}
-                className="input input-bordered w-full"
+                className="input bg-base-200/50 rounded-2xl w-full border-none focus:bg-base-200 transition-colors"
                 placeholder="Your full name"
               />
             </div>
@@ -110,7 +148,7 @@ const OnboardingPage = () => {
                 onChange={(e) =>
                   setFormState({ ...formState, bio: e.target.value })
                 }
-                className="textarea textarea-bordered h-24"
+                className="textarea bg-base-200/50 rounded-2xl border-none focus:bg-base-200 transition-colors h-24"
                 placeholder="Tell others about yourself and your language learning goals"
               />
             </div>
@@ -128,9 +166,9 @@ const OnboardingPage = () => {
                     setFormState({
                       ...formState,
                       nativeLanguage: e.target.value,
-                    });
+                    })
                   }}
-                  className="select select-bordered w-full"
+                  className="select bg-base-200/50 rounded-2xl w-full border-none focus:bg-base-200 transition-colors"
                 >
                   <option value="">Select your native language</option>
                   {LANGUAGES.map((lang) => (
@@ -154,9 +192,9 @@ const OnboardingPage = () => {
                       learningLanguage: e.target.value,
                     });
                   }}
-                  className="select select-bordered w-full"
+                  className="select bg-base-200/50 rounded-2xl w-full border-none focus:bg-base-200 transition-colors"
                 >
-                  <option value="">Select your native language</option>
+                  <option value="">Select your learning language</option>
                   {LANGUAGES.map((lang) => (
                     <option key={`native-${lang}`} value={lang.toLowerCase()}>
                       {lang}
@@ -179,26 +217,26 @@ const OnboardingPage = () => {
                   onChange={(e) => {
                     setFormState({ ...formState, location: e.target.value });
                   }}
-                  className="input input-bordered w-full pl-10"
+                  className="input bg-base-200/50 rounded-2xl w-full pl-10 border-none focus:bg-base-200 transition-colors"
                   placeholder="City, Country"
                 />
               </div>
             </div>
             {/* Submit - Button */}
             <button
-              className="btn btn-primary w-full"
+              className="btn btn-primary w-full rounded-2xl mt-4"
               disabled={isPending}
               type="submit"
             >
               {!isPending ? (
                 <>
                   <ShipWheelIcon className="size-5 mr-2" />
-                  Complete Onboarding
+                  {authUser?.isOnboarded ? "Update Profile" : "Complete Onboarding"}
                 </>
               ) : (
                 <>
                   <LoaderIcon className="animate-spin size-5 mr-2" />
-                  Onboarding....
+                  {authUser?.isOnboarded ? "Updating..." : "Onboarding...."}
                 </>
               )}
             </button>
