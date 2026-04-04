@@ -32,7 +32,25 @@ const OnboardingPage = () => {
   const { mutate: onboardMutation, isPending } = useMutation({
     mutationFn: completeOnboarding,
     onSuccess: () => {
-      toast.success(authUser?.isOnboarded ? "Profile updated successfully" : "Profile onboarded successfully");
+      toast.success(
+        authUser?.isOnboarded
+          ? "Profile updated successfully"
+          : "Profile onboarded successfully",
+      );
+
+      // Update cache immediately to prevent redirection race condition
+      queryClient.setQueryData(["authUser"], (oldData) => {
+        if (!oldData || !oldData.user) return oldData;
+        return {
+          ...oldData,
+          user: {
+            ...oldData.user,
+            ...formState,
+            isOnboarded: true,
+          },
+        };
+      });
+
       queryClient.invalidateQueries({ queryKey: ["authUser"] });
       // Redirect to home page
       navigate("/");
@@ -66,7 +84,11 @@ const OnboardingPage = () => {
 
   const handleRemoveImage = (e) => {
     e.preventDefault();
-    setFormState({ ...formState, profilePic: "https://png.pngtree.com/png-clipart/20200224/original/pngtree-cartoon-color-simple-male-avatar-png-image_5230557.jpg" });
+    setFormState({
+      ...formState,
+      profilePic:
+        "https://png.pngtree.com/png-clipart/20200224/original/pngtree-cartoon-color-simple-male-avatar-png-image_5230557.jpg",
+    });
   };
 
   return (
@@ -109,7 +131,8 @@ const OnboardingPage = () => {
                   <UploadIcon className="size-4 mr-2" />
                   Upload Image
                 </button>
-                {formState.profilePic !== "https://png.pngtree.com/png-clipart/20200224/original/pngtree-cartoon-color-simple-male-avatar-png-image_5230557.jpg" && (
+                {formState.profilePic !==
+                  "https://png.pngtree.com/png-clipart/20200224/original/pngtree-cartoon-color-simple-male-avatar-png-image_5230557.jpg" && (
                   <button
                     type="button"
                     onClick={handleRemoveImage}
@@ -166,7 +189,7 @@ const OnboardingPage = () => {
                     setFormState({
                       ...formState,
                       nativeLanguage: e.target.value,
-                    })
+                    });
                   }}
                   className="select bg-base-200/50 rounded-2xl w-full border-none focus:bg-base-200 transition-colors"
                 >
@@ -231,7 +254,9 @@ const OnboardingPage = () => {
               {!isPending ? (
                 <>
                   <ShipWheelIcon className="size-5 mr-2" />
-                  {authUser?.isOnboarded ? "Update Profile" : "Complete Onboarding"}
+                  {authUser?.isOnboarded
+                    ? "Update Profile"
+                    : "Complete Onboarding"}
                 </>
               ) : (
                 <>

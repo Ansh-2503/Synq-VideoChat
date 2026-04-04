@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getUserFriends } from "../lib/api";
 import useAuthUser from "../hooks/useAuthUser";
+import useStreamClient from "../hooks/useStreamClient";
 import { SearchIcon, MessageSquareIcon } from "lucide-react";
 import ChatContainer from "../components/ChatContainer";
 
@@ -9,6 +10,7 @@ const HomePage = () => {
   const { authUser } = useAuthUser();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedChatUser, setSelectedChatUser] = useState(null);
+  const chatClient = useStreamClient();
 
   const { data: friends = [], isLoading } = useQuery({
     queryKey: ["friends"],
@@ -96,6 +98,7 @@ const HomePage = () => {
       >
         {selectedChatUser ? (
           <ChatContainer
+            chatClient={chatClient}
             targetUserId={selectedChatUser._id}
             onClose={() => setSelectedChatUser(null)}
           />

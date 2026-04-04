@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import useAuthUser from "../hooks/useAuthUser";
-import { useQuery } from "@tanstack/react-query";
-import { getStreamToken } from "../lib/api";
 import {
   Channel,
   ChannelHeader,
@@ -11,66 +9,51 @@ import {
   Thread,
   Window,
 } from "stream-chat-react";
-import { StreamChat } from "stream-chat";
 import toast from "react-hot-toast";
 import ChatLoader from "./ChatLoader";
 import CallButton from "./CallButton";
-import { XIcon, ArrowLeftIcon } from "lucide-react";
+import { XIcon } from "lucide-react";
 
-const STREAM_API_KEY = import.meta.env.VITE_STREAM_API_KEY;
-
-const ChatContainer = ({ targetUserId, onClose }) => {
-  const [chatClient, setChatClient] = useState(null);
+const ChatContainer = ({ chatClient, targetUserId, onClose }) => {
   const [channel, setChannel] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const { authUser } = useAuthUser();
 
-  const { data: tokenData } = useQuery({
-    queryKey: ["streamToken"],
-    queryFn: getStreamToken,
-    enabled: !!authUser,
-  });
-
   useEffect(() => {
-    let client;
-    const initChat = async () => {
-      if (!tokenData?.token || !authUser || !targetUserId) return;
+    if (!chatClient || !authUser || !targetUserId) return;
 
+    let active = true;
+
+    const initChannel = async () => {
       try {
-        console.log("Initializing stream chat client...");
-
-        client = StreamChat.getInstance(STREAM_API_KEY);
-
-        await client.connectUser(
-          {
-            id: authUser._id,
-            name: authUser.fullName,
-            image: authUser.profilePic,
-          },
-          tokenData.token,
-        );
+        setLoading(true);
 
         const channelId = [authUser._id, targetUserId].sort().join("-");
 
-        const currChannel = client.channel("messaging", channelId, {
+        const currChannel = chatClient.channel("messaging", channelId, {
           members: [authUser._id, targetUserId],
         });
 
         await currChannel.watch();
 
-        setChatClient(client);
-        setChannel(currChannel);
+        if (active) {
+          setChannel(currChannel);
+        }
       } catch (error) {
-        console.error("Error initializing chat:", error);
-        toast.error("Could not connect to chat. Please try again.");
+        console.error("Error initializing channel:", error);
+        toast.error("Could not open chat. Please try again.");
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
-    initChat();
-  }, [tokenData, authUser, targetUserId]);
+    initChannel();
+
+    return () => {
+      active = false;
+    };
+  }, [chatClient, authUser, targetUserId]);
 
   const handleVideoCall = () => {
     if (channel) {
@@ -106,15 +89,6 @@ const ChatContainer = ({ targetUserId, onClose }) => {
               )}
             </div>
 
-            {onClose && (
-              <button
-                onClick={onClose}
-                className="btn btn-ghost btn-circle absolute left-1 top-2.5 z-10 md:hidden bg-base-100/90 shadow-sm"
-                title="Back"
-              >
-                <ArrowLeftIcon className="size-5" />
-              </button>
-            )}
             <Window>
               <ChannelHeader />
               <MessageList />

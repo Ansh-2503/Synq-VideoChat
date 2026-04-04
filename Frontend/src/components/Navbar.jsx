@@ -18,16 +18,24 @@ const Navbar = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           {/* Global Logo */}
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center gap-2.5">
-              <ShipWheelIcon className="size-9 text-primary" />
-              <span className="text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider">
+          <Link to="/" className="flex items-center gap-3">
+            <img
+              src="/Synq_logo.png"
+              alt="Synq Logo"
+              className="size-[80px] object-contain"
+            />
+            <div className="hidden sm:flex flex-col justify-center">
+              <span className="text-2xl font-black font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary leading-none tracking-tight">
                 Synq
               </span>
-            </Link>
-          </div>
+              <span className="text-[10px] font-semibold text-base-content/40 tracking-[0.2em] mt-1 whitespace-nowrap leading-none pl-0.5">
+                VIDEO CHAT
+              </span>
+            </div>
+          </Link>
 
-          <div className="flex items-center gap-3 sm:gap-4 ml-auto">
+          {/* Right Side Actions */}
+          <div className="flex items-center gap-2 sm:gap-4 ml-auto">
             <Link to="/notifications">
               <button className="btn btn-ghost btn-circle">
                 <div className="indicator">
@@ -36,48 +44,52 @@ const Navbar = () => {
                       {incomingRequests.length}
                     </span>
                   )}
-                  <BellIcon className="h-6 w-6 text-base-content opacity-70" />
+                  <BellIcon className="h-5 w-5 sm:h-6 sm:w-6 text-base-content opacity-70" />
                 </div>
               </button>
             </Link>
-          </div>
 
-          <ThemeSelector />
+            <ThemeSelector />
 
-          {/* User Avatar Dropdown */}
-          <div className="dropdown dropdown-end">
-            <div
-              tabIndex={0}
-              role="button"
-              className="btn btn-ghost btn-circle avatar"
-            >
-              <div className="w-9 rounded-full overflow-hidden shadow-sm border border-base-content/10">
-                <img src={authUser?.profilePic} alt="User Avatar" className="object-cover" />
+            {/* User Avatar Dropdown */}
+            <div className="dropdown dropdown-end">
+              <div
+                tabIndex={0}
+                role="button"
+                className="btn btn-ghost btn-circle avatar ml-1 sm:ml-2"
+              >
+                <div className="w-9 rounded-full overflow-hidden shadow-sm border border-base-content/10">
+                  <img
+                    src={authUser?.profilePic}
+                    alt="User Avatar"
+                    className="object-cover"
+                  />
+                </div>
               </div>
+              <ul
+                tabIndex={0}
+                className="mt-3 z-[1] p-2 shadow-lg menu menu-sm dropdown-content bg-base-100 border border-base-content/10 rounded-xl w-44 gap-1"
+              >
+                <li>
+                  <Link
+                    to="/onboarding"
+                    className="flex items-center gap-2.5 py-2 px-3 rounded-lg text-sm font-medium hover:bg-base-200 transition-colors"
+                  >
+                    <UserIcon className="h-4 w-4 text-primary" />
+                    <span>Update Profile</span>
+                  </Link>
+                </li>
+                <li>
+                  <button
+                    onClick={logoutMutation}
+                    className="flex items-center gap-2.5 py-2 px-3 rounded-lg text-sm font-medium text-error hover:bg-error/10 hover:text-error transition-colors mt-0.5"
+                  >
+                    <LogOutIcon className="h-4 w-4" />
+                    <span>Logout</span>
+                  </button>
+                </li>
+              </ul>
             </div>
-            <ul
-              tabIndex={0}
-              className="mt-3 z-[1] p-2 shadow-lg menu menu-sm dropdown-content bg-base-100 border border-base-content/10 rounded-xl w-44 gap-1"
-            >
-              <li>
-                <Link 
-                  to="/onboarding" 
-                  className="flex items-center gap-2.5 py-2 px-3 rounded-lg text-sm font-medium hover:bg-base-200 transition-colors"
-                >
-                  <UserIcon className="h-4 w-4 text-primary" />
-                  <span>Update Profile</span>
-                </Link>
-              </li>
-              <li>
-                <button 
-                  onClick={logoutMutation} 
-                  className="flex items-center gap-2.5 py-2 px-3 rounded-lg text-sm font-medium text-error hover:bg-error/10 hover:text-error transition-colors mt-0.5"
-                >
-                  <LogOutIcon className="h-4 w-4" />
-                  <span>Logout</span>
-                </button>
-              </li>
-            </ul>
           </div>
         </div>
       </div>

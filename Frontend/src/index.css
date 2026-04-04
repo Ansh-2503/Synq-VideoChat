@@ -48,7 +48,8 @@ html, body {
   border-top: none !important;
   border: 1px solid var(--fallback-bc,oklch(var(--bc)/0.1)) !important;
   border-radius: 2rem !important;
-  margin: 0.5rem 1rem 1rem 1rem !important;
+  margin: 0.5rem auto 1rem auto !important;
+  width: 95% !important;
   box-shadow: none !important;
 }
 

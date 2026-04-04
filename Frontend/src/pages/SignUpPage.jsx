@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ShipWheelIcon } from "lucide-react";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { Link } from "react-router";
 import useSignup from "../hooks/useSignup";
 
@@ -9,6 +9,7 @@ const SignUpPage = () => {
     email: "",
     password: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   const { error, isPending, signupMutation } = useSignup();
 
@@ -22,11 +23,20 @@ const SignUpPage = () => {
         {/* SignUp Form - Left Side */}
         <div className="w-full lg:w-1/2 p-4 sm:p-8 flex flex-col">
           {/* App Logo */}
-          <div className="mb-4 flex items-center justify-start gap-2">
-            <ShipWheelIcon className="size-9 text-primary" />
-            <span className="text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider">
-              Synq
-            </span>
+          <div className="mb-4 flex items-center justify-start gap-3">
+            <img
+              src="/Synq_logo.png"
+              alt="Synq Logo"
+              className="size-[80px] object-contain"
+            />
+            <div className="flex flex-col justify-center">
+              <span className="text-3xl font-black font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary leading-none tracking-tight">
+                Synq
+              </span>
+              <span className="text-[12px] font-semibold text-base-content/40 tracking-[0.2em] mt-1 whitespace-nowrap leading-none pl-0.5">
+                VIDEO CHAT
+              </span>
+            </div>
           </div>
 
           {/* Error Message Handling */}
@@ -89,18 +99,32 @@ const SignUpPage = () => {
                     <label className="label">
                       <span className="label-text">Password</span>
                     </label>
-                    <input
-                      type="password"
-                      placeholder="*******"
-                      className="input bg-base-200/50 rounded-2xl w-full border-none focus:bg-base-200 transition-colors"
-                      value={signupData.password}
-                      onChange={(e) =>
-                        setSignupData({
-                          ...signupData,
-                          password: e.target.value,
-                        })
-                      }
-                    />
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="*******"
+                        className="input bg-base-200/50 rounded-2xl w-full border-none focus:bg-base-200 transition-colors pr-12"
+                        value={signupData.password}
+                        onChange={(e) =>
+                          setSignupData({
+                            ...signupData,
+                            password: e.target.value,
+                          })
+                        }
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content transition-colors"
+                        tabIndex={-1}
+                      >
+                        {showPassword ? (
+                          <EyeOffIcon className="size-5" />
+                        ) : (
+                          <EyeIcon className="size-5" />
+                        )}
+                      </button>
+                    </div>
                     <p className="text-xs opacity-70 mt-1">
                       Password must be at least 6 characters long
                     </p>
